@@ -5,8 +5,8 @@ import glob
 import os
 
 splitChars = [';', ',', '|']
-# xmlPath = r"/Users/lvnanchun/Documents/workspace/CardPirate/tools/XmlToScript.unixlike/xml_db"
-xmlPath = r"/Users/lvnanchun/Documents/workspace/正式策划案/导出工具表/导出XML表"
+xmlPath = r"/Users/lvnanchun/Documents/workspace/CardPirate/tools/XmlToScript.unixlike/xml_db"
+# xmlPath = r"/Users/lvnanchun/Documents/workspace/正式策划案/导出工具表/导出XML表"
 
 xmlFiles = {}
 # xmlFiles = glob.glob(r'/Users/lvnanchun/Documents/workspace/正式策划案/导出工具表/导出XML表/*.xml')
@@ -50,12 +50,14 @@ for key, value in splitStrList.items():
         cfgFile = open(xmlPath + '/' + key + '.cfg', "r+")
         for line in cfgFile.readlines():
             if line.find("string") != -1:
-                line = line[0:line.find("string")+6]
+
                 if line.find(name + '=') == 0:
+                    line = line[0:line.find("string")+6]
                     line += sortedChar
-                line += '\r\n'
-                print line
+                    line += '\n'
+                # print line
             linesList.append(line)
+            print line
         cfgFile.close()
         cfgFile = open(xmlPath + '/' + key + '.cfg', "w+")
         cfgFile.writelines(linesList)
