@@ -1,10 +1,12 @@
 # -*- coding:utf-8 -*-
 
 from RedmineProcesser import RedmineProcesser as Redmine
+from SvnProcesser import SvnProcesser as Svn
 import ConfigParser
 
 if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
+    svn = Svn()
     config.read('config.ini')
     print 'please input redmine number:'
     issueNumber = raw_input()
@@ -21,6 +23,7 @@ if __name__ == "__main__":
     print 'revision numbers:\n'
 
     for revision in revisionList:
+        svn.copy_file_to_online(revision)
         print revision,
 
     print '\n'
