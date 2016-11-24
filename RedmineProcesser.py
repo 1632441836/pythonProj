@@ -1,13 +1,15 @@
 # -*- coding:utf-8 -*-
 
-import urllib, urllib2
+import urllib
+import urllib2
 import cookielib
 from bs4 import BeautifulSoup
 import re
 import ConfigParser
 
+
 class PostData:
-    '用于发送的字典'
+    """用于发送的字典"""
     __dictionary = {}
     __config = ConfigParser.ConfigParser()
 
@@ -30,7 +32,7 @@ class PostData:
 
 
 class RedmineProcesser:
-    '用于处理redmine的class'
+    """用于处理redmine的class"""
     __opener = None
     __page_soup = None
     __issue_locate = ''
@@ -39,10 +41,10 @@ class RedmineProcesser:
     __svn_revision_list = []
     __assigned_to = ''
     __headers = {
-        "Connection":"keep-alive",
+        "Connection": "keep-alive",
         "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
         "Accept-Encoding": "gzip, deflate",
-        "Cache-Control":"max-age=0"
+        "Cache-Control": "max-age=0"
     }
     __config = ConfigParser.ConfigParser()
 
@@ -70,27 +72,27 @@ class RedmineProcesser:
         return self.__redmine_url + self.__issue_locate
 
     def __get_all_sub_issue(self):
-        subIssueList = [self.__issue_locate]
-        subIssueTable = self.__page_soup.find_all(id='issue_tree')
-        for result in subIssueTable:
-            if (result.form != None):
-                subIssueSubject = result.form.table.find_all(href=re.compile('/issues/*'))
-                for subjectName in subIssueSubject:
-                    subIssueList.append(subjectName.get('href'))
-        return subIssueList
+        sub_issue_list = [self.__issue_locate]
+        sub_issue_table = self.__page_soup.find_all(id='issue_tree')
+        for result in sub_issue_table:
+            if result.form is not None:
+                sub_issue_subject = result.form.table.find_all(href=re.compile('/issues/*'))
+                for subjectName in sub_issue_subject:
+                    sub_issue_list.append(subjectName.get('href'))
+        return sub_issue_list
 
     def __get_all_svn_revision(self):
         result = []
-        history = self.__page_soup.find_all(id='history')
-        for his in history:
-            for one_his in his.find_all('p'):
-                if (one_his.getText()):
-                    match = re.search(r'\d{3},?\d{3}', one_his.getText())
-                    if (match):
-                        result.append(filter(str.isdigit, match.group().encode('ascii')))
+        history = self.__page_soup.find(name='div', id='history')
+        for one_his in history.find_all('p'):
+            if one_his.getText():
+                match = re.search(r'\d{3},?\d{3}', one_his.getText())
+                if match:
+                    result.append(filter(str.isdigit, match.group().encode('ascii')))
         return result
 
     def __get_issue_assigned_to(self):
+        assign_locate = ""
         for assignTo in self.__page_soup.find_all(name='td', class_='assigned-to'):
             assign_locate = assignTo.a['href']
         return assign_locate
@@ -105,24 +107,35 @@ class RedmineProcesser:
         return self.__svn_revision_list
 
     def change_state(self, assign_to, note):
-        postData = PostData()
-        postData.add_notes(note)
+        post_data = PostData()
+        post_data.add_notes(note)
         if self.__is_my_issue():
-            postData.add_issue_assign_to(assign_to)
+            post_data.add_issue_assign_to(assign_to)
 
         try:
-            request = urllib2.Request(self.__get_issue_url(), urllib.urlencode(postData.get_dictionary()), headers=self.__headers)
+            encode_post_data = urllib.urlencode(post_data.get_dictionary())
+            request = urllib2.Request(self.__get_issue_url(), encode_post_data, headers=self.__headers)
             response = self.__opener.open(request)
+            print response.getcode()
         except Exception as e:
             print e
             print self.__issue_locate
             return 1
         return 0
 
+    def get_svn_note(self):
+        subject_node = self.__page_soup.find(name='div', class_='subject')
+        subject_string = subject_node.div.h3.string
+
+        page_node = self.__page_soup.find(name='div', id='content')
+        number_string = page_node.h2.string
+
+        return number_string + ' ' + subject_string
+
+
 if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.read('config.ini')
     redmine = RedmineProcesser('/issues/41529')
-    redmine.change_state(config.get('user_id', 'qa'), 'test')
-
-
+    # redmine.change_state(config.get('user_id', 'qa'), 'test')
+    print redmine.get_svn_note()

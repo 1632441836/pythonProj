@@ -1,12 +1,12 @@
 # -*- coding:utf-8 -*-
-import sys
 import commands
 import ConfigParser
 import re
 import os
 
+
 class SvnProcesser:
-    '处理svn版本的类'
+    """处理svn版本的类"""
     __config = ConfigParser.ConfigParser()
     __trunk_path = ''
     __online_path = ''
@@ -24,12 +24,6 @@ class SvnProcesser:
             file_dictionary[i.group(4)] = i.group(1)
 
         return file_dictionary
-
-    def copy_file_to_online(self, revision):
-        file_dict = self.__get_modified_files(revision)
-        for file_name in file_dict:
-            print file_name + "  " + file_dict[file_name]
-            self.__run_command_by_status(file_name, file_dict[file_name])
 
     def __run_command_by_status(self, file_name, status):
         file_path = self.__trunk_path + file_name
@@ -55,7 +49,18 @@ class SvnProcesser:
             print file_name
             print '--------------------------'
 
+    def copy_file_to_online(self, revision):
+        file_dict = self.__get_modified_files(revision)
+        for file_name in file_dict:
+            print file_name + "  " + file_dict[file_name]
+            self.__run_command_by_status(file_name, file_dict[file_name])
 
+    def commit_online_files(self, commit_notes):
+        print commands.getoutput('svn commit -m "' + commit_notes + '" ' + self.__online_path)
+
+    def update_all_files(self):
+        print commands.getoutput('svn up ' + self.__trunk_path)
+        print commands.getoutput('svn up ' + self.__online_path)
 
 if __name__ == "__main__":
     svnProcesser = SvnProcesser()
