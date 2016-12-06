@@ -14,6 +14,7 @@ class PostData:
     __config = ConfigParser.ConfigParser()
 
     def __init__(self):
+        self.__dictionary = {}
         self.__config.read('config.ini')
         self.__dictionary['authenticity_token'] = self.__config.get('network_info', 'authenticity_token')
         self.__dictionary['_method'] = "put"
@@ -60,35 +61,39 @@ class RedmineProcesser:
         cookie.load('cookie.txt', True, True)
         self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
         # 发送网络请求获取网页内容
-        request = urllib2.Request(self.__get_issue_url(), headers=self.__headers)
-        response = self.__opener.open(request)
-        html = response.read()
-        self.__page_soup = BeautifulSoup(html, "html.parser")
-        self.__sub_issue_list = self.__get_all_sub_issue()
-        self.__svn_revision_list = self.__get_all_svn_revision()
-        self.__assigned_to = self.__get_issue_assigned_to()
+        try:
+            request = urllib2.Request(self.__get_issue_url(), headers=self.__headers)
+            response = self.__opener.open(request)
+            html = response.read()
+            self.__page_soup = BeautifulSoup(html, "html.parser")
+            self.__sub_issue_list = self.__get_all_sub_issue()
+            self.__svn_revision_list = self.__get_all_svn_revision()
+            self.__assigned_to = self.__get_issue_assigned_to()
+        except Exception as e:
+            print 'redmine init error'
+            print e
 
     def __get_issue_url(self):
         return self.__redmine_url + self.__issue_locate
 
     def __get_all_sub_issue(self):
         sub_issue_list = [self.__issue_locate]
-        sub_issue_table = self.__page_soup.find_all(id='issue_tree')
-        for result in sub_issue_table:
-            if result.form is not None:
-                sub_issue_subject = result.form.table.find_all(href=re.compile('/issues/*'))
-                for subjectName in sub_issue_subject:
-                    sub_issue_list.append(subjectName.get('href'))
+        sub_issue_table = self.__page_soup.find(name='div', id='issue_tree')
+        if sub_issue_table.form is not None:
+            sub_issue_subject = sub_issue_table.form.table.find_all(href=re.compile('/issues/*'))
+            for subjectName in sub_issue_subject:
+                sub_issue_list.append(subjectName.get('href'))
         return sub_issue_list
 
     def __get_all_svn_revision(self):
         result = []
         history = self.__page_soup.find(name='div', id='history')
-        for one_his in history.find_all('p'):
-            if one_his.getText():
-                match = re.search(r'\d{3},?\d{3}', one_his.getText())
-                if match:
-                    result.append(filter(str.isdigit, match.group().encode('ascii')))
+        if history:
+            for one_his in history.find_all('p'):
+                if one_his.getText().find('pid') == -1:
+                    match = re.findall(r'\d{3},?\d{3}', one_his.getText())
+                    for revision_str in match:
+                        result.append(filter(str.isdigit, revision_str.encode('ascii')))
         return result
 
     def __get_issue_assigned_to(self):
@@ -111,6 +116,9 @@ class RedmineProcesser:
         post_data.add_notes(note)
         if self.__is_my_issue():
             post_data.add_issue_assign_to(assign_to)
+
+        # print self.__issue_locate
+        # print post_data.get_dictionary()
 
         try:
             encode_post_data = urllib.urlencode(post_data.get_dictionary())

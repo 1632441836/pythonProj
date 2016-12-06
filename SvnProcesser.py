@@ -1,5 +1,6 @@
 # -*- coding:utf-8 -*-
 import commands
+import subprocess
 import ConfigParser
 import re
 import os
@@ -41,7 +42,7 @@ class SvnProcesser:
                 print commands.getoutput('cp' + ' ' + file_path + ' ' + des_path)
             elif os.path.isdir(file_path):
                 print commands.getoutput('cp -r' + ' ' + file_path + ' ' + os.path.dirname(des_path))
-            if filter(str.isupper, commands.getoutput('svn st ' + des_path + ' | ' + "awk '{print $1}'")) == 'M':
+            if commands.getoutput('svn st ' + des_path + ' | ' + "awk '{print $1}'").find('?') != -1:
                 print commands.getoutput('svn add' + ' ' + des_path)
         else:
             print '--------------------------'
@@ -56,7 +57,14 @@ class SvnProcesser:
             self.__run_command_by_status(file_name, file_dict[file_name])
 
     def commit_online_files(self, commit_notes):
-        print commands.getoutput('svn commit -m "' + commit_notes + '" ' + self.__online_path)
+        # print commands.getoutput('svn commit -m "' + commit_notes + '" ' + self.__online_path)
+        command = "svn " + "commit " + "-m '" + commit_notes + "' " + self.__online_path
+        print command
+        out_put = subprocess.check_output(command, shell=True, env={'LANG': 'zh_CN.UTF-8'})
+        print out_put
+        match = re.search(r'(?<=Committed revision )\d{6}(?=\.)', out_put)
+        if match:
+            return match.group()
 
     def update_all_files(self):
         print commands.getoutput('svn up ' + self.__trunk_path)
