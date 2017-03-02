@@ -1,8 +1,7 @@
 # -*- coding:utf-8 -*-
 
-import urllib
-import urllib2
 import cookielib
+import requests
 from bs4 import BeautifulSoup
 import re
 import ConfigParser
@@ -33,38 +32,44 @@ class PostData:
 
 
 class RedmineProcesser:
-    """用于处理redmine的class"""
+    """用于处理redmine的class, 基于requests"""
     __opener = None
     __page_soup = None
+    __session = None
     __issue_locate = ''
     __redmine_url = ''
     __sub_issue_list = []
     __svn_revision_list = []
     __assigned_to = ''
-    __headers = {
-        "Connection": "keep-alive",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Encoding": "gzip, deflate",
-        "Cache-Control": "max-age=0"
-    }
     __config = ConfigParser.ConfigParser()
 
     def __init__(self, issue_locate):
         self.__config.read('config.ini')
         # 补充几个config中的内容
         self.__redmine_url = self.__config.get('network_info', 'redmine_url')
-        self.__headers['User-agent'] = self.__config.get('network_info', 'User-agent')
         # 本redmine问题地址
         self.__issue_locate = issue_locate
-        # 创建带cookie的opener
+        # 创建cookies对象
         cookie = cookielib.MozillaCookieJar()
         cookie.load('cookie.txt', True, True)
-        self.__opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cookie))
+        # 构建headers的基础内容
+        headers = {
+            "Connection": "keep-alive",
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+            "Accept-Encoding": "gzip, deflate",
+            "Cache-Control": "max-age=0",
+            "User-agent": self.__config.get('network_info', 'User-agent')
+        }
+
+        # 创建窗口
+        self.__session = requests.Session()
+        self.__session.cookies = cookie
+        self.__session.headers = headers
+
         # 发送网络请求获取网页内容
         try:
-            request = urllib2.Request(self.__get_issue_url(), headers=self.__headers)
-            response = self.__opener.open(request)
-            html = response.read()
+            response = self.__session.get(self.__get_issue_url())
+            html = response.content
             self.__page_soup = BeautifulSoup(html, "html.parser")
             self.__sub_issue_list = self.__get_all_sub_issue()
             self.__svn_revision_list = self.__get_all_svn_revision()
@@ -72,6 +77,7 @@ class RedmineProcesser:
         except Exception as e:
             print 'redmine init error'
             print e
+            raise
 
     def __get_issue_url(self):
         return self.__redmine_url + self.__issue_locate
@@ -117,14 +123,10 @@ class RedmineProcesser:
         if self.__is_my_issue():
             post_data.add_issue_assign_to(assign_to)
 
-        # print self.__issue_locate
-        # print post_data.get_dictionary()
-
         try:
-            encode_post_data = urllib.urlencode(post_data.get_dictionary())
-            request = urllib2.Request(self.__get_issue_url(), encode_post_data, headers=self.__headers)
-            response = self.__opener.open(request)
-            print response.getcode()
+            response = self.__session.post(self.__get_issue_url(), post_data.get_dictionary())
+            if response.ok:
+                print self.__issue_locate + ":ok"
         except Exception as e:
             print e
             print self.__issue_locate
@@ -145,5 +147,5 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.read('config.ini')
     redmine = RedmineProcesser('/issues/41529')
-    # redmine.change_state(config.get('user_id', 'qa'), 'test')
+    # redmine.change_state(config.get('user_id', 'my_id'), 'test')
     print redmine.get_svn_note()
