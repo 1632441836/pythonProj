@@ -63,7 +63,7 @@ if __name__ == "__main__":
         note = commit_revision + '已合并'
 
         for redmine in redmineList:
-            redmine.change_state(config.get('user_id', 'qa'), note)
+            redmine.change_issue_to_qa_and_state_feedback(note)
 
 
 

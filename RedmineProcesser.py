@@ -19,16 +19,20 @@ class PostData:
         self.__dictionary['_method'] = "put"
 
     def add_issue_assign_to(self, assign_to):
-        self.__dictionary['issue[assigned_to_id]'] = assign_to
+        if assign_to:
+            self.__dictionary['issue[assigned_to_id]'] = assign_to
 
     def add_notes(self, notes):
-        self.__dictionary['notes'] = notes
+        if notes:
+            self.__dictionary['notes'] = notes
 
-    def add_issue_state(self, state):
-        self.__dictionary['issue[status_id]'] = state
+    def add_issue_status(self, status):
+        if status:
+            self.__dictionary['issue[status_id]'] = status
 
     def get_dictionary(self):
         return self.__dictionary
+
 
 
 class RedmineProcesser:
@@ -96,7 +100,7 @@ class RedmineProcesser:
         history = self.__page_soup.find(name='div', id='history')
         if history:
             for one_his in history.find_all('p'):
-                if one_his.getText().find('pid') == -1:
+                if one_his.getText().find('pid') == -1 and one_his.getText().find(u'已合并') == -1:
                     match = re.findall(r'\d{3},?\d{3}', one_his.getText())
                     for revision_str in match:
                         result.append(filter(str.isdigit, revision_str.encode('ascii')))
@@ -108,6 +112,12 @@ class RedmineProcesser:
             assign_locate = assignTo.a['href']
         return assign_locate
 
+    def __get_issue_writer(self):
+        writer = ""
+        for assignTo in self.__page_soup.find_all(name='p', class_='author'):
+            writer = assignTo.a['href']
+        return writer
+
     def __is_my_issue(self):
         return self.__assigned_to == '/users/' + self.__config.get('user_id', 'my_id')
 
@@ -117,11 +127,11 @@ class RedmineProcesser:
     def svn_revision_list(self):
         return self.__svn_revision_list
 
-    def change_state(self, assign_to, note):
+    def change_state(self, assign_to, note, status):
         post_data = PostData()
         post_data.add_notes(note)
-        if self.__is_my_issue():
-            post_data.add_issue_assign_to(assign_to)
+        post_data.add_issue_assign_to(assign_to)
+        post_data.add_issue_status(status)
 
         try:
             response = self.__session.post(self.__get_issue_url(), post_data.get_dictionary())
@@ -132,6 +142,17 @@ class RedmineProcesser:
             print self.__issue_locate
             return 1
         return 0
+
+    def change_issue_to_qa_and_state_feedback(self, note):
+        qa_id = self.__config.get('user_id', 'qa')
+        if self.__is_my_issue():
+            status = self.__config.get('issue_status', 'feedback')
+        self.change_state(qa_id, note, status)
+
+    def change_issue_back_to_writer_and_state_done(self, note):
+        writer_id = self.__get_issue_writer()
+        status = self.__config.get('issue_status', 'solved')
+        self.change_state(writer_id, note, status)
 
     def get_svn_note(self):
         subject_node = self.__page_soup.find(name='div', class_='subject')
@@ -147,5 +168,5 @@ if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.read('config.ini')
     redmine = RedmineProcesser('/issues/41529')
-    # redmine.change_state(config.get('user_id', 'my_id'), 'test')
-    print redmine.get_svn_note()
+    # print redmine.get_svn_note()
+    print redmine.svn_revision_list()

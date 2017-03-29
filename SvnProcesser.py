@@ -16,6 +16,7 @@ class SvnProcesser:
         self.__config.read('config.ini')
         self.__trunk_path = self.__config.get('local_file_system', 'trunk_path')
         self.__online_path = self.__config.get('local_file_system', 'online_path')
+        self.__trunk_url = self.__config.get('remote_url', 'trunk_url')
 
     def __get_modified_files(self, revision):
         svn_log = commands.getoutput('svn log -v -r ' + str(revision) + ' ' + self.__config.get('local_file_system', 'trunk_path'))
@@ -56,9 +57,13 @@ class SvnProcesser:
             print file_name + "  " + file_dict[file_name]
             self.__run_command_by_status(file_name, file_dict[file_name])
 
-    def commit_online_files(self, commit_notes):
-        # print commands.getoutput('svn commit -m "' + commit_notes + '" ' + self.__online_path)
-        command = "svn " + "commit " + "-m '" + commit_notes + "' " + self.__online_path
+    def merge_file_to_online(self, revision):
+        command_str = 'svn merge -c ' + str(revision) + ' ' + self.__trunk_url + ' ' + self.__online_path
+        print command_str
+        # print commands.getoutput(command_str)
+
+    def commit_files(self, commit_notes, file_path):
+        command = "svn " + "commit " + "-m '" + commit_notes + "' " + file_path
         print command
         out_put = subprocess.check_output(command, shell=True, env={'LANG': 'zh_CN.UTF-8'})
         print out_put
@@ -66,10 +71,18 @@ class SvnProcesser:
         if match:
             return match.group()
 
+    def commit_online_files(self, commit_notes):
+        # print commands.getoutput('svn commit -m "' + commit_notes + '" ' + self.__online_path)
+        return self.commit_files(commit_notes, self.__online_path)
+
+    def commit_trunk_files(self, commit_notes):
+        return self.commit_files(commit_notes, self.__trunk_path)
+
     def update_all_files(self):
         print commands.getoutput('svn up ' + self.__trunk_path)
         print commands.getoutput('svn up ' + self.__online_path)
 
+
 if __name__ == "__main__":
     svnProcesser = SvnProcesser()
-    svnProcesser.copy_file_to_online(193917)
+    svnProcesser.merge_file_to_online(213718)
