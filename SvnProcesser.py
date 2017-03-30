@@ -4,6 +4,7 @@ import subprocess
 import ConfigParser
 import re
 import os
+import sys
 
 
 class SvnProcesser:
@@ -13,7 +14,7 @@ class SvnProcesser:
     __online_path = ''
 
     def __init__(self):
-        self.__config.read('config.ini')
+        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
         self.__trunk_path = self.__config.get('local_file_system', 'trunk_path')
         self.__online_path = self.__config.get('local_file_system', 'online_path')
         self.__trunk_url = self.__config.get('remote_url', 'trunk_url')

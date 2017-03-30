@@ -4,11 +4,13 @@ from RedmineProcesser import RedmineProcesser as Redmine
 from SvnProcesser import SvnProcesser as Svn
 import ConfigParser
 import re
+import sys
+import os
 
 if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     svn = Svn()
-    config.read('config.ini')
+    config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
     print 'please input redmine number:'
     issueNumber = raw_input()
 

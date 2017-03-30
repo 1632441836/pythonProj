@@ -5,6 +5,8 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import ConfigParser
+import sys
+import os
 
 
 class PostData:
@@ -14,7 +16,7 @@ class PostData:
 
     def __init__(self):
         self.__dictionary = {}
-        self.__config.read('config.ini')
+        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
         self.__dictionary['authenticity_token'] = self.__config.get('network_info', 'authenticity_token')
         self.__dictionary['_method'] = "put"
 
@@ -48,14 +50,14 @@ class RedmineProcesser:
     __config = ConfigParser.ConfigParser()
 
     def __init__(self, issue_locate):
-        self.__config.read('config.ini')
+        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
         # 补充几个config中的内容
         self.__redmine_url = self.__config.get('network_info', 'redmine_url')
         # 本redmine问题地址
         self.__issue_locate = issue_locate
         # 创建cookies对象
         cookie = cookielib.MozillaCookieJar()
-        cookie.load('cookie.txt', True, True)
+        cookie.load(os.path.dirname(os.path.realpath(__file__)) + '/cookie.txt', True, True)
         # 构建headers的基础内容
         headers = {
             "Connection": "keep-alive",
@@ -106,6 +108,13 @@ class RedmineProcesser:
                         result.append(filter(str.isdigit, revision_str.encode('ascii')))
         return result
 
+    def __split_userid_from_raw_userstring(self, user_string):
+        if user_string:
+            match = re.findall('/users/(\d*)', user_string)
+            if match:
+                return match[0]
+        return ''
+
     def __get_issue_assigned_to(self):
         assign_locate = ""
         for assignTo in self.__page_soup.find_all(name='td', class_='assigned-to'):
@@ -118,6 +127,12 @@ class RedmineProcesser:
             writer = assignTo.a['href']
         return writer
 
+    def __get_issue_assigned_to_id(self):
+        return self.__split_userid_from_raw_userstring(self.__get_issue_assigned_to())
+
+    def __get_issue_writer_id(self):
+        return self.__split_userid_from_raw_userstring(self.__get_issue_writer())
+
     def __is_my_issue(self):
         return self.__assigned_to == '/users/' + self.__config.get('user_id', 'my_id')
 
@@ -127,7 +142,7 @@ class RedmineProcesser:
     def svn_revision_list(self):
         return self.__svn_revision_list
 
-    def change_state(self, assign_to, note, status):
+    def change_state(self, assign_to=None, note=None, status=None):
         post_data = PostData()
         post_data.add_notes(note)
         post_data.add_issue_assign_to(assign_to)
@@ -150,9 +165,12 @@ class RedmineProcesser:
         self.change_state(qa_id, note, status)
 
     def change_issue_back_to_writer_and_state_done(self, note):
-        writer_id = self.__get_issue_writer()
+        if self.__is_my_issue():
+            assign_to_id = self.__get_issue_writer_id()
+        else:
+            assign_to_id = self.__get_issue_assigned_to_id()
         status = self.__config.get('issue_status', 'solved')
-        self.change_state(writer_id, note, status)
+        self.change_state(assign_to_id, note, status)
 
     def get_svn_note(self):
         subject_node = self.__page_soup.find(name='div', class_='subject')
@@ -167,6 +185,10 @@ class RedmineProcesser:
 if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
     config.read('config.ini')
-    redmine = RedmineProcesser('/issues/41529')
+    redmine = RedmineProcesser('/issues/42022')
     # print redmine.get_svn_note()
-    print redmine.svn_revision_list()
+    # print redmine.svn_revision_list()
+    writer_id = redmine._RedmineProcesser__get_issue_writer()
+    # print redmine.get_issue_writer()
+    print writer_id
+    redmine.change_issue_back_to_writer_and_state_done(writer_id)
