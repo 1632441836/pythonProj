@@ -162,6 +162,8 @@ class RedmineProcesser:
         qa_id = self.__config.get('user_id', 'qa')
         if self.__is_my_issue():
             status = self.__config.get('issue_status', 'feedback')
+        else:
+            status = ""
         self.change_state(qa_id, note, status)
 
     def change_issue_back_to_writer_and_state_done(self, note):
