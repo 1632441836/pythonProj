@@ -118,7 +118,8 @@ class RedmineProcesser:
     def __get_issue_assigned_to(self):
         assign_locate = ""
         for assignTo in self.__page_soup.find_all(name='td', class_='assigned-to'):
-            assign_locate = assignTo.a['href']
+            if assignTo.a:
+                assign_locate = assignTo.a['href']
         return assign_locate
 
     def __get_issue_writer(self):
