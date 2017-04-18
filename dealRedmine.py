@@ -1,15 +1,13 @@
 # -*- coding:utf-8 -*-
 
 from RedmineProcesser import RedmineProcesser as Redmine
-from SvnProcesser import SvnProcesser as Svn
+import SvnProcesser as Svn
 import ConfigParser
 import re
-import sys
 import os
 
 if __name__ == "__main__":
     config = ConfigParser.ConfigParser()
-    svn = Svn()
     config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
     print 'please input redmine number:'
     issueNumber = raw_input()
@@ -34,7 +32,7 @@ if __name__ == "__main__":
 
     print '\nupdate the files'
 
-    svn.update_all_files()
+    Svn.update_all_files()
 
     print 'merge the files'
 
@@ -53,19 +51,16 @@ if __name__ == "__main__":
     print 'please check the files manually'
 
     for revision in revisionList:
-        svn.copy_file_to_online(revision)
+        Svn.copy_file_to_online(revision)
 
     print 'commit or not?(y/n)'
     commit = raw_input()
 
     if commit == 'y':
-        commit_revision = svn.commit_online_files(redmineRoot.get_svn_note())
+        commit_revision = Svn.commit_online_files(redmineRoot.get_svn_note())
         if commit_revision is None:
             commit_revision = ''
         note = commit_revision + '已合并'
 
         for redmine in redmineList:
             redmine.change_issue_to_qa_and_state_feedback(note)
-
-
-
