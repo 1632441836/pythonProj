@@ -1,0 +1,7 @@
+# python
+*.py[cod]
+
+# personal
+config.ini
+cookie.txt
+
