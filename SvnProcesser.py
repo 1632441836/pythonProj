@@ -34,7 +34,6 @@ def add(file_path):
     if os.path.isdir(file_path):
         shell_command = "svn st " + file_path
         status_log = commands.getoutput(shell_command)
-        print status_log
         string_pattern = r"(\S)(\s*)(\S*)(?=\n)"
         matchs = re.finditer(string_pattern, status_log)
         if matchs:
@@ -80,14 +79,15 @@ def copy_file_to_online(revision):
     file_dict = get_modified_files(revision)
     trunk_path = _config.get('local_file_system', 'trunk_path')
     online_path = _config.get('local_file_system', 'online_path')
+    print file_dict
     for file_name in file_dict:
         if file_dict[file_name] == 'M':
-            copy_file(trunk_path + file_name, online_path + file_name)
+            copy_file(trunk_path + '/' + file_name, online_path + '/' + file_name)
         elif file_dict[file_name] == 'A':
-            copy_file(trunk_path + file_name, online_path + file_name)
+            copy_file(trunk_path + '/' + file_name, online_path + '/' + file_name)
             add(online_path + file_name)
         elif file_dict[file_name] == 'D':
-            delete(online_path + file_name)
+            delete(online_path + '/' + file_name)
         else:
             print "No such status."
             print file_name + ' ' + file_dict[file_name]
