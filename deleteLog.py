@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+删除log函数的脚本
+"""
 
 import sys
 import os

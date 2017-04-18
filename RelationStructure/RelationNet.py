@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+关系网相关的类
+"""
 
 from RelationNode import RelationNode as RNode
 import pydot

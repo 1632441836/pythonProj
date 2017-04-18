@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+钉钉机器人相关的类
+"""
 
 import requests
 

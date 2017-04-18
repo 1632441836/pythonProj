@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+lua分析的脚本
+"""
 
 import commands
 import os

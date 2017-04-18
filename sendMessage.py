@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+钉钉机器人使用脚本
+"""
 
 from WorkTools import DingRobot as DRobot
 import ConfigParser

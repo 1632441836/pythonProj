@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+处理redmine的脚本
+"""
 
 from RedmineProcesser import RedmineProcesser as Redmine
 import SvnProcesser as Svn

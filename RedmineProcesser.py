@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+redmine处理相关的类
+"""
 
 import cookielib
 import requests

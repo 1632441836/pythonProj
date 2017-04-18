@@ -1,4 +1,8 @@
 # -*- coding:utf-8 -*-
+"""
+使用svn相关的函数
+"""
+
 import commands
 import subprocess
 import ConfigParser
