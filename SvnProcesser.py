@@ -94,7 +94,7 @@ def copy_file_to_online(revision):
 
 
 def commit_trunk_files(notes):
-    trunk_path = _config.get('local_file_system', 'online_path')
+    trunk_path = _config.get('local_file_system', 'trunk_path')
     add(trunk_path + "/Resources")
     return commit(trunk_path, notes)
 
@@ -106,7 +106,7 @@ def commit_online_files(notes):
 
 
 def update_all_files():
-    trunk_path = _config.get('local_file_system', 'online_path')
+    trunk_path = _config.get('local_file_system', 'trunk_path')
     online_path = _config.get('local_file_system', 'online_path')
     update(trunk_path)
     update(online_path)
