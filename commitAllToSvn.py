@@ -3,10 +3,10 @@
 提交文件至svn同时修改redmine状态
 """
 
-from RedmineProcesser import RedmineProcesser as Redmine
-import SvnProcesser as Svn
 import sys
 
+from WorkTools import SvnProcesser as Svn
+from WorkTools.RedmineProcesser import RedmineProcesser as Redmine
 
 if __name__ == "__main__":
     print sys.argv

@@ -6,10 +6,25 @@
 
 ## 内容
 
-- searchCharacter.py 用于查找配置中的分隔符并添加
-- searchWrongXml.py 用于查找配置中错误（分隔符相连）的字段
-- dealRedmine.py      处理redmine的主流程。依赖RedmineProcesser.py和config.ini。
-- RedmineProcesser.py 处理redmine的类和一些辅助类。依赖config.ini和cookie.txt。
-- config.ini          用于存放本机配置
-- writeConfig.py      用于写入配置
-- cookie.txt          用于存放cookie
+>
+.
+|____commitAllToSvn.py
+|____config.ini
+|____cookie.txt
+|____dealRedmine.py
+|____deleteLog.py
+|____generateReadme.py
+|____LuaStructureAnalysis.py
+|____README.md
+|____RelationStructure
+| |______init__.py
+| |____RelationNet.py
+| |____RelationNode.py
+|____robootTest.py
+|____sendMessage.py
+|____WorkTools
+| |______init__.py
+| |____DingRobot.py
+| |____RedmineProcesser.py
+| |____SvnProcesser.py
+

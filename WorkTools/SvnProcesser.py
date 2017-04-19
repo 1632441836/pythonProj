@@ -11,7 +11,7 @@ import os
 
 
 _config = ConfigParser.ConfigParser()
-_config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
+_config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
 
 
 def commit(file_path, note):

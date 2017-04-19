@@ -8,7 +8,6 @@ import requests
 from bs4 import BeautifulSoup
 import re
 import ConfigParser
-import sys
 import os
 
 
@@ -19,7 +18,7 @@ class PostData:
 
     def __init__(self):
         self.__dictionary = {}
-        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
+        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
         self.__dictionary['authenticity_token'] = self.__config.get('network_info', 'authenticity_token')
         self.__dictionary['_method'] = "put"
 
@@ -39,7 +38,6 @@ class PostData:
         return self.__dictionary
 
 
-
 class RedmineProcesser:
     """用于处理redmine的class, 基于requests"""
     __opener = None
@@ -53,14 +51,14 @@ class RedmineProcesser:
     __config = ConfigParser.ConfigParser()
 
     def __init__(self, issue_locate):
-        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
+        self.__config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
         # 补充几个config中的内容
         self.__redmine_url = self.__config.get('network_info', 'redmine_url')
         # 本redmine问题地址
         self.__issue_locate = issue_locate
         # 创建cookies对象
         cookie = cookielib.MozillaCookieJar()
-        cookie.load(os.path.dirname(os.path.realpath(__file__)) + '/cookie.txt', True, True)
+        cookie.load(os.path.dirname(os.path.realpath(__file__)) + '/../cookie.txt', True, True)
         # 构建headers的基础内容
         headers = {
             "Connection": "keep-alive",
@@ -194,7 +192,4 @@ if __name__ == "__main__":
     redmine = RedmineProcesser('/issues/42022')
     # print redmine.get_svn_note()
     # print redmine.svn_revision_list()
-    writer_id = redmine._RedmineProcesser__get_issue_writer()
     # print redmine.get_issue_writer()
-    print writer_id
-    redmine.change_issue_back_to_writer_and_state_done(writer_id)

@@ -3,4 +3,4 @@
 工作使用的小工具包
 """
 
-__all__ = ["DingRobot"]
+__all__ = ["DingRobot", "SvnProcesser", "RedmineProcesser"]
