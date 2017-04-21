@@ -14,7 +14,7 @@ _config = ConfigParser.ConfigParser()
 _config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
 
 
-def copy_file(s_path, t_path):  # TODO
+def copy_file(s_path, t_path):
     """
     从源路径向目标路径拷贝文件
     :param s_path: 源路径
@@ -23,29 +23,7 @@ def copy_file(s_path, t_path):  # TODO
     """
     s_path = os.path.normpath(s_path)
     t_path = os.path.normpath(t_path)
-    if os.path.exists(s_path):
-        if os.path.exists(t_path):
-            if os.path.isdir(s_path) and os.path.isdir(t_path):
-                pass
-        elif os.path.exists(os.path.dirname(t_path)):
-            t_path = os.path.dirname(t_path)
-            if os.path.isdir(t_path):
-                shutil.copy(s_path, t_path)
-            else:
-                print "copy file error."
-                print "target path not right"
-                print s_path
-                print t_path
-        else:
-            print "copy file error."
-            print "target path doesnt exit"
-            print s_path
-            print t_path
-    else:
-        print "copy file error."
-        print "source doesnt exist"
-        print s_path
-        print t_path
+    shutil.copytree(s_path, t_path)
 
 
 def export_file(s_path, t_path):
