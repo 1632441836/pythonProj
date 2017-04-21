@@ -116,6 +116,11 @@ def update_all_files():
     update(online_path)
 
 
+def export_file_forced(s_path, t_path):
+    shell_commands = "svn export %s %s --force" % s_path % t_path
+    print commands.getoutput(shell_commands)
+
+
 if __name__ == "__main__":
     # svnProcesser = SvnProcesser()
     # svnProcesser.merge_file_to_online(213718)

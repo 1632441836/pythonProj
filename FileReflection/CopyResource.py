@@ -5,10 +5,22 @@
 from FileMap import FileMap
 import os
 import shutil
+import ConfigParser
+from WorkTools import SvnProcesser as Svn
+from WorkTools import RedmineProcesser as Redmine
+
+
+_config = ConfigParser.ConfigParser()
+_config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
 
 
 def copy_file(s_path, t_path):  # TODO
-    """从源地址拷贝文件到目标地址"""
+    """
+    从源路径向目标路径拷贝文件
+    :param s_path: 源路径
+    :param t_path: 目标路径
+    :return:
+    """
     s_path = os.path.normpath(s_path)
     t_path = os.path.normpath(t_path)
     if os.path.exists(s_path):
@@ -36,9 +48,54 @@ def copy_file(s_path, t_path):  # TODO
         print t_path
 
 
-def export_file(s_path, t_path):  # TODO
-    """从svn中导出文件到目标地址"""
-    pass
+def export_file(s_path, t_path):
+    """
+    从svn导出文件到目标地址
+    :param s_path: svn的地址
+    :param t_path: 目标地址
+    :return:
+    """
+    if os.path.exists(t_path):
+        # 目标地址存在直接导出
+        if os.path.basename(s_path) == os.path.basename(t_path):
+            # 名字一致
+            Svn.export_file_forced(s_path, t_path)
+        else:
+            # 名字不一致给续个名字
+            Svn.export_file_forced(s_path, t_path + os.path.sep + os.path.basename(s_path))
+    else:
+        # 目标地址不存在，查看目标地址父级目录是否存在，若存在且目标目录名字和源目录名字一致，那么也导出出去。
+        if os.path.exists(os.path.dirname(t_path)) and os.path.basename(s_path) == os.path.basename(t_path):
+            Svn.export_file_forced(s_path, os.path.dirname(t_path))
+        else:
+            print "export error"
+            return -1
+
+
+def is_from_svn(path):
+    """
+    判断地址中是否含有svn的地址
+    :param path: 地址
+    :return:
+    """
+    svn_root = _config.get("remote_url", "svn_root")
+    if path.find(svn_root) != -1:
+        return True
+    else:
+        return False
+
+
+def translate_files(s_path, t_path):
+    """
+    从源路径向目标路径转移文件
+    :param s_path: 源路径
+    :param t_path: 目标路径
+    :return:
+    """
+    if is_from_svn(s_path):
+        export_file(s_path, t_path)
+    else:
+        copy_file(s_path, t_path)
 
 
 if __name__ == "__main__":
@@ -48,7 +105,7 @@ if __name__ == "__main__":
     tar_list = f_map.get_target_list(source_path)
     if tar_list:
         for tar in tar_list:
-            copy_file(source_path, tar)
+            translate_files(source_path, tar)
     else:
         target_path = input("信息文件里没有这个路径，请手动输入一次。")
         copy_file(source_path, target_path)
