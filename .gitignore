@@ -1,8 +1,10 @@
 # python
 *.py[cod]
 
+# personal info
+*.ini
+
 # personal
-config.ini
 cookie.txt
 .idea
 BattleScript
