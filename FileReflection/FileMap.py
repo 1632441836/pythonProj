@@ -1,4 +1,7 @@
 # -*- coding:utf-8 -*-
+"""
+文件映射map相关
+"""
 import os
 
 
@@ -85,9 +88,9 @@ class FileMap:
 
 
 if __name__ == "__main__":
-    file_map = FileMap()
-    file_map.read_ini_file()
-    print file_map
-    file_map.add_relation('ccc', 'dddd')
-    print file_map
-    file_map.write_back_file()
+    f_map = FileMap()
+    f_map.read_ini_file()
+    print f_map
+    f_map.add_relation('ccc', 'dddd')
+    print f_map
+    f_map.write_back_file()
