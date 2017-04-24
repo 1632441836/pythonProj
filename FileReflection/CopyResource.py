@@ -6,6 +6,8 @@ from FileMap import FileMap
 import os
 import shutil
 import ConfigParser
+import glob
+import commands
 from WorkTools import SvnProcesser as Svn
 from WorkTools import RedmineProcesser as Redmine
 
@@ -23,7 +25,49 @@ def copy_file(s_path, t_path):
     """
     s_path = os.path.normpath(s_path)
     t_path = os.path.normpath(t_path)
-    shutil.copytree(s_path, t_path)
+    shell_command = "cp -r %s %s"
+    print s_path
+    print t_path
+    if os.path.exists(s_path):
+        if os.path.isdir(s_path):
+            if os.path.isdir(t_path):
+                if os.path.basename(s_path) == os.path.basename(t_path):
+                    print commands.getoutput(shell_command % (s_path, os.path.dirname(t_path)))
+                else:
+                    print commands.getoutput(shell_command % (s_path, t_path))
+            else:
+                print "impossible, plz check the paths"
+                # TODO throw an error
+                exit(1)
+        else:
+            if os.path.exists(t_path):
+                if os.path.isdir(t_path):
+                    print commands.getoutput(shell_command % (s_path, t_path))
+                else:
+                    print commands.getoutput(shell_command % (s_path, t_path))
+            else:
+                if os.path.isdir(os.path.dirname(t_path)):
+                    print commands.getoutput(shell_command % (s_path, t_path))
+                else:
+                    print "impossible, plz check the paths"
+                    # TODO throw an error
+                    exit(1)
+    else:
+        print "source path doesnt exist."
+        # TODO throw an error
+        exit(1)
+
+
+def copy_file_by_pattern(s_path, t_path):
+    """
+    复制文件，但是可以使用正则表达式。
+    :param s_path:源文件
+    :param t_path:目标文件
+    :return:
+    """
+    file_list = glob.glob(s_path)
+    for one_file in file_list:
+        copy_file(one_file, t_path)
 
 
 def export_file(s_path, t_path):
