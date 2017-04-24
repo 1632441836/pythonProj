@@ -60,7 +60,7 @@ def copy_file(s_path, t_path):
 
 def copy_file_by_pattern(s_path, t_path):
     """
-    复制文件，但是可以使用正则表达式。
+    复制文件，使用了glob模块因此可以使用通配符
     :param s_path:源文件
     :param t_path:目标文件
     :return:
