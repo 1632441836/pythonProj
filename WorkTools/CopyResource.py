@@ -2,7 +2,7 @@
 """
 资源拷贝工具接口
 """
-from FileMap import FileMap
+from FileReflection.FileMap import FileMap
 import os
 import shutil
 import ConfigParser
