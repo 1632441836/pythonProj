@@ -4,6 +4,7 @@
 """
 import ConfigParser
 import os
+import sys
 from WorkTools import CopyResource
 from WorkTools import SvnProcesser as Svn
 
@@ -70,28 +71,21 @@ def start_copy(kind, pattern_input=None):
 
 
 if __name__ == "__main__":
-    # if len(sys.argv) < 2:
-    #     print "need argv"
-    #     exit(1)
+    if len(sys.argv) == 1:
+        print "need argv"
+        exit(1)
 
-    # # 更新战斗中赏金猎人相关的文字图片
-    # source_path = _config.get("local_file_system", "art_ani_path") + "/特效/功能特效/赏金猎人/战斗数字"
-    # output_path = _config.get("local_file_system", "trunk_path") + "/Resources/images/battle/number"
-    #
-    # CopyResource.copy_file_by_pattern(source_path + "/*.png", output_path)
-    # CopyResource.copy_file_by_pattern(source_path + "/*.plist", output_path)
-
-    kind = "battle_ship"
-
-    start_copy(kind)
+    kind = sys.argv[1]
+    if len(sys.argv) == 2:
+        start_copy(kind)
+    elif len(sys.argv) == 3:
+        name_pattern = sys.argv[2]
+        start_copy(kind, name_pattern)
 
     if _COMMIT_OR_NOT:
         commit_notes = "提交资源"
         if "commit_notes" in _resource_config.options(kind):
             commit_notes = _resource_config.get(kind, "commit_notes")
         trunk_path = _config.get("local_file_system", "trunk_path")
-        Svn.add(trunk_path)
+        Svn.add(trunk_path + "／Resources")
         Svn.commit(trunk_path, commit_notes)
-
-
-
