@@ -64,6 +64,7 @@ def start_copy(kind, pattern_input=None):
             if pattern_input:
                 vars_dict["file_pattern"] = pattern_input
             for src_file in get_src_list(kind, vars_dict):
+                Svn.update(src_file)
                 CopyResource.copy_file_by_pattern(src_file, get_tar_path(kind))
     else:
         print "no config"
@@ -73,6 +74,7 @@ def start_copy(kind, pattern_input=None):
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print "need argv"
+        print _resource_config.sections()
         exit(1)
 
     kind = sys.argv[1]

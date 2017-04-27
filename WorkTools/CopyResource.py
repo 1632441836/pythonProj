@@ -36,9 +36,7 @@ def copy_file(s_path, t_path):
                 else:
                     print commands.getoutput(shell_command % (s_path, t_path))
             else:
-                print "impossible, plz check the paths"
-                # TODO throw an error
-                exit(1)
+                raise Exception("plz check the paths, source is dir but target is file.", s_path, t_path)
         else:
             if os.path.exists(t_path):
                 if os.path.isdir(t_path):
@@ -49,13 +47,9 @@ def copy_file(s_path, t_path):
                 if os.path.isdir(os.path.dirname(t_path)):
                     print commands.getoutput(shell_command % (s_path, t_path))
                 else:
-                    print "impossible, plz check the paths"
-                    # TODO throw an error
-                    exit(1)
+                    raise Exception("plz check the paths, dir of target file doesnt exist.", s_path, t_path)
     else:
-        print "source path doesnt exist."
-        # TODO throw an error
-        exit(1)
+        raise Exception("source path doesnt exist.", s_path, t_path)
 
 
 def copy_file_by_pattern(s_path, t_path):
