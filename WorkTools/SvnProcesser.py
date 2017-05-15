@@ -34,6 +34,11 @@ def revert(file_path):
     print commands.getoutput(shell_command)
 
 
+def status(file_path):
+    shell_command = "svn st " + file_path
+    print commands.getoutput(shell_command)
+
+
 def add(file_path):
     if os.path.isdir(file_path):
         shell_command = "svn st " + file_path

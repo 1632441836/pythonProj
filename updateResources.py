@@ -54,6 +54,12 @@ def get_sub_kind(kind):
     return _resource_config.get(kind, "update_kind_list").split('|')
 
 
+def update_src(src_file):
+    if not CopyResource.is_from_svn(src_file):
+        if os.path.exists(os.path.dirname(src_file)):
+            Svn.update(os.path.dirname(src_file))
+
+
 def start_copy(kind, pattern_input=None):
     if _resource_config.has_section(kind):
         if _resource_config.has_option(kind, "update_kind_list"):
@@ -64,7 +70,7 @@ def start_copy(kind, pattern_input=None):
             if pattern_input:
                 vars_dict["file_pattern"] = pattern_input
             for src_file in get_src_list(kind, vars_dict):
-                Svn.update(src_file)
+                update_src(src_file)
                 CopyResource.copy_file_by_pattern(src_file, get_tar_path(kind))
     else:
         print "no config"
@@ -78,16 +84,23 @@ if __name__ == "__main__":
         exit(1)
 
     kind = sys.argv[1]
+
+    trunk_path = _config.get("local_file_system", "trunk_path")
+    update_src(trunk_path)
     if len(sys.argv) == 2:
         start_copy(kind)
     elif len(sys.argv) == 3:
         name_pattern = sys.argv[2]
         start_copy(kind, name_pattern)
 
-    if _COMMIT_OR_NOT:
+    Svn.status(trunk_path)
+
+    print "commit or not(y/n):",
+    commit_or_not = raw_input("commit or not(y/n):")
+
+    if commit_or_not == "y":
         commit_notes = "提交资源"
         if "commit_notes" in _resource_config.options(kind):
             commit_notes = _resource_config.get(kind, "commit_notes")
-        trunk_path = _config.get("local_file_system", "trunk_path")
-        Svn.add(trunk_path + "／Resources")
+        Svn.add(trunk_path + "/Resources")
         Svn.commit(trunk_path, commit_notes)
