@@ -7,6 +7,7 @@ import os
 import sys
 from WorkTools import CopyResource
 from WorkTools import SvnProcesser as Svn
+from WorkTools import RedmineProcesser as Redmine
 
 _config = ConfigParser.ConfigParser()
 _config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
@@ -95,12 +96,20 @@ if __name__ == "__main__":
 
     Svn.status(trunk_path)
 
-    print "commit or not(y/n):",
     commit_or_not = raw_input("commit or not(y/n):")
 
     if commit_or_not == "y":
         commit_notes = "提交资源"
         if "commit_notes" in _resource_config.options(kind):
             commit_notes = _resource_config.get(kind, "commit_notes")
-        Svn.add(trunk_path + "/Resources")
-        Svn.commit(trunk_path, commit_notes)
+
+        issue_id = raw_input("redmine:")
+        if issue_id == 'n':
+            Svn.add(trunk_path + "/Resources")
+            Svn.commit(trunk_path, commit_notes)
+        else:
+            redmine = Redmine.RedmineProcesser("/issues/" + str(issue_id))
+            svn_note = redmine.get_svn_note()
+            Svn.add(trunk_path + "/Resources")
+            svn_revision = Svn.commit(trunk_path, svn_note)
+            redmine.change_issue_back_to_writer_and_state_done(svn_revision)
