@@ -9,7 +9,7 @@ def get_file_deepth(file_path):
     return len(file_path.split(os.path.sep))
 
 
-class FileMap:
+class FileMap(object):
     """文件映射关系的map，使用一个map文件来创建，会对这个文件进行修改。"""
     def __init__(self):
         self.raw_file_string = ""

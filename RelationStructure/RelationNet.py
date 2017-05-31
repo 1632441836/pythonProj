@@ -13,7 +13,7 @@ _config = ConfigParser.ConfigParser()
 _config.read(os.path.dirname(os.path.realpath(__file__)) + '/../config.ini')
 
 
-class RelationNet:
+class RelationNet(object):
     """关系网的类"""
     def __init__(self):
         self.__cur_node = None

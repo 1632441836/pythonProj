@@ -3,7 +3,7 @@
 关系节点相关的类
 """
 
-class RelationNode:
+class RelationNode(object):
     """用于构建关系网节点的数据结构"""
     def __init__(self, value=""):
         self.__come_from = []

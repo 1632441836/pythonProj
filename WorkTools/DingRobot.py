@@ -6,7 +6,7 @@
 import requests
 
 
-class RobotJson:
+class RobotJson(object):
     """
     钉钉机器人使用的json格式
     """
@@ -129,7 +129,7 @@ class MarkdownJson(RobotJson):
         self.msg["markdown"]["text"] = text
 
 
-class DingRobot:
+class DingRobot(object):
     """钉钉机器人"""
     def __init__(self, robot_url):
         self.__robot_url = robot_url

@@ -11,7 +11,7 @@ import ConfigParser
 import os
 
 
-class PostData:
+class PostData(object):
     """用于发送的字典"""
     __dictionary = {}
     __config = ConfigParser.ConfigParser()
@@ -38,7 +38,7 @@ class PostData:
         return self.__dictionary
 
 
-class RedmineProcesser:
+class RedmineProcesser(object):
     """用于处理redmine的class, 基于requests"""
     __opener = None
     __page_soup = None
